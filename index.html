@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>3D Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="theme-dark weather-clear">
+  <div class="scene">
+    <div class="sky-glow glow-1"></div>
+    <div class="sky-glow glow-2"></div>
+
+    <div class="cloud-layer cloud-layer-back">
+      <div class="cloud c1"></div>
+      <div class="cloud c2"></div>
+      <div class="cloud c3"></div>
+    </div>
+
+    <div class="rain-layer" id="rainLayer"></div>
+
+    <div class="lightning-layer">
+      <div class="lightning-flash" id="lightningFlash"></div>
+    </div>
+
+    <div class="stars-layer" id="starsLayer"></div>
+  </div>
+
+  <main class="container">
+    <section class="weather-card">
+      <div class="top-bar">
+        <div>
+          <p class="eyebrow">Weather Dashboard</p>
+          <h1>3D Forecast Experience</h1>
+        </div>
+
+        <div class="top-actions">
+          <button id="unitToggle" class="ghost-btn" type="button">°C / °F</button>
+          <button id="themeToggle" class="ghost-btn" type="button">🌙 / ☀️</button>
+        </div>
+      </div>
+
+      <form id="searchForm" class="search-form">
+        <div class="search-wrap">
+          <input
+            id="cityInput"
+            type="text"
+            placeholder="Search city..."
+            autocomplete="off"
+            required
+          />
+          <button type="submit">Search</button>
+        </div>
+      </form>
+
+      <div class="history-wrap">
+        <p class="history-title">Recent Searches</p>
+        <div id="recentSearches" class="recent-searches"></div>
+      </div>
+
+      <div id="loader" class="loader hidden">
+        <div class="spinner"></div>
+        <p>Loading weather data...</p>
+      </div>
+
+      <div id="errorBox" class="error-box hidden"></div>
+
+      <section id="weatherContent" class="weather-content hidden">
+        <div class="current-weather">
+          <div class="current-left">
+            <p id="locationName" class="location-name">Phoenix, US</p>
+            <p id="todayDate" class="today-date">Today</p>
+
+            <div class="temp-row">
+              <div id="weatherIcon" class="weather-icon">☀️</div>
+              <div>
+                <h2 id="currentTemp" class="current-temp">28°C</h2>
+                <p id="weatherDesc" class="weather-desc">Sunny</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="current-right">
+            <div class="detail-box">
+              <span>Wind</span>
+              <strong id="windSpeed">0 km/h</strong>
+            </div>
+            <div class="detail-box">
+              <span>Humidity</span>
+              <strong id="humidity">--%</strong>
+            </div>
+            <div class="detail-box">
+              <span>Max / Min</span>
+              <strong id="maxMinTemp">-- / --</strong>
+            </div>
+            <div class="detail-box">
+              <span>Feels Like</span>
+              <strong id="feelsLike">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="info-grid">
+          <div class="panel">
+            <div class="panel-head">
+              <h3>Hourly Forecast</h3>
+            </div>
+            <div id="hourlyCards" class="hourly-scroll"></div>
+          </div>
+
+          <div class="panel sun-panel">
+            <div class="panel-head">
+              <h3>Sunrise & Sunset</h3>
+            </div>
+            <div class="sun-grid">
+              <div class="sun-box">
+                <span>Sunrise</span>
+                <strong id="sunriseTime">--:--</strong>
+              </div>
+              <div class="sun-box">
+                <span>Sunset</span>
+                <strong id="sunsetTime">--:--</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <section class="forecast-section">
+          <div class="section-header">
+            <h3>5-Day Forecast</h3>
+          </div>
+          <div id="forecastCards" class="forecast-grid"></div>
+        </section>
+      </section>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

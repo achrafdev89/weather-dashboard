@@ -1,0 +1,11 @@
+{
+  "name": "weather-dashboard-screenshots",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "screenshots": "node scripts/capture-screenshots.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.55.0"
+  }
+}

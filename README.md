@@ -19,13 +19,12 @@ It provides **real-time weather data**, **hourly forecasts**, and **dynamic anim
 ## 🖼️ Project Preview
 
 <a href="https://3d-weather-dashboard.netlify.app" target="_blank">
-  <img src="./screenshots/home.png" alt="3D Weather Dashboard Preview" width="100%" />
+  <img src="./screenshots/demo.gif" alt="3D Weather Dashboard Demo" width="100%" />
 </a>
 
 <p align="center">
-  Click the image above to open the live app.
+  Click the GIF above to open the live app.
 </p>
-
 ---
 
 ## 📸 Screenshots

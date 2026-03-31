@@ -102,25 +102,6 @@ Toggle between themes.
 
 ---
 
-# 📸 Screenshots
-
-### Home Screen
-
-![Home](./screenshots/home.gif)
-
-### Forecast View
-
-![Forecast](./screenshots/forecast.png)
-
-### Mobile View
-
-![Mobile](./screenshots/mobile.png)
-
-### Storm Mode
-
-![Storm](./screenshots/storm.gif)
-
----
 
 # 📂 Project Structure
 

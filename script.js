@@ -29,6 +29,7 @@ const starsLayer = document.getElementById("starsLayer");
 let currentUnit = "c";
 let currentWeatherRaw = null;
 let currentLocation = null;
+let lightningInterval = null;
 
 const WEATHER_CODES = {
   0: { label: "Clear sky", icon: "☀️", theme: "weather-clear" },
@@ -40,22 +41,33 @@ const WEATHER_CODES = {
   51: { label: "Light drizzle", icon: "🌦️", theme: "weather-drizzle" },
   53: { label: "Moderate drizzle", icon: "🌦️", theme: "weather-drizzle" },
   55: { label: "Dense drizzle", icon: "🌧️", theme: "weather-rain" },
+  56: { label: "Freezing drizzle", icon: "🌧️", theme: "weather-rain" },
+  57: { label: "Heavy freezing drizzle", icon: "🌧️", theme: "weather-rain" },
   61: { label: "Slight rain", icon: "🌦️", theme: "weather-rain" },
   63: { label: "Moderate rain", icon: "🌧️", theme: "weather-rain" },
   65: { label: "Heavy rain", icon: "🌧️", theme: "weather-rain" },
+  66: { label: "Freezing rain", icon: "🌧️", theme: "weather-rain" },
+  67: { label: "Heavy freezing rain", icon: "🌧️", theme: "weather-rain" },
   71: { label: "Slight snow", icon: "🌨️", theme: "weather-snow" },
   73: { label: "Moderate snow", icon: "🌨️", theme: "weather-snow" },
   75: { label: "Heavy snow", icon: "❄️", theme: "weather-snow" },
+  77: { label: "Snow grains", icon: "❄️", theme: "weather-snow" },
   80: { label: "Rain showers", icon: "🌦️", theme: "weather-rain" },
   81: { label: "Moderate showers", icon: "🌧️", theme: "weather-rain" },
   82: { label: "Violent showers", icon: "⛈️", theme: "weather-thunder" },
+  85: { label: "Snow showers", icon: "🌨️", theme: "weather-snow" },
+  86: { label: "Heavy snow showers", icon: "❄️", theme: "weather-snow" },
   95: { label: "Thunderstorm", icon: "⛈️", theme: "weather-thunder" },
   96: { label: "Thunderstorm with hail", icon: "⛈️", theme: "weather-thunder" },
   99: { label: "Thunderstorm with heavy hail", icon: "⛈️", theme: "weather-thunder" },
 };
 
 function getWeatherInfo(code) {
-  return WEATHER_CODES[code] || { label: "Unknown", icon: "🌍", theme: "weather-clear" };
+  return WEATHER_CODES[code] || {
+    label: "Unknown",
+    icon: "🌍",
+    theme: "weather-clear",
+  };
 }
 
 function showLoader() {
@@ -92,7 +104,9 @@ function formatDate(dateString) {
 }
 
 function formatShortDay(dateString) {
-  return new Date(dateString).toLocaleDateString("en-US", { weekday: "short" });
+  return new Date(dateString).toLocaleDateString("en-US", {
+    weekday: "short",
+  });
 }
 
 function formatTime(dateString) {
@@ -103,7 +117,10 @@ function formatTime(dateString) {
 }
 
 async function getCoordinates(city) {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(
+    city
+  )}&count=1&language=en&format=json`;
+
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to fetch location data.");
 
@@ -136,7 +153,11 @@ async function getWeather(lat, lon) {
 
 function saveRecentSearch(city) {
   const existing = JSON.parse(localStorage.getItem("recentCities")) || [];
-  const updated = [city, ...existing.filter((item) => item.toLowerCase() !== city.toLowerCase())].slice(0, 6);
+  const updated = [
+    city,
+    ...existing.filter((item) => item.toLowerCase() !== city.toLowerCase()),
+  ].slice(0, 6);
+
   localStorage.setItem("recentCities", JSON.stringify(updated));
   renderRecentSearches();
 }
@@ -158,10 +179,16 @@ function renderRecentSearches() {
 function clearWeatherEffects() {
   rainLayer.innerHTML = "";
   starsLayer.innerHTML = "";
+
+  if (lightningInterval) {
+    clearInterval(lightningInterval);
+    lightningInterval = null;
+  }
 }
 
-function createRain(count = 80) {
+function createRain(count = window.innerWidth < 640 ? 45 : 90) {
   rainLayer.innerHTML = "";
+
   for (let i = 0; i < count; i++) {
     const drop = document.createElement("div");
     drop.className = "raindrop";
@@ -173,8 +200,9 @@ function createRain(count = 80) {
   }
 }
 
-function createStars(count = 35) {
+function createStars(count = window.innerWidth < 640 ? 20 : 35) {
   starsLayer.innerHTML = "";
+
   for (let i = 0; i < count; i++) {
     const star = document.createElement("div");
     star.className = "star";
@@ -193,6 +221,7 @@ function triggerLightning() {
 
 function setWeatherTheme(weatherCode, isDay = 1) {
   const weather = getWeatherInfo(weatherCode);
+
   document.body.classList.remove(
     "weather-clear",
     "weather-clouds",
@@ -211,13 +240,14 @@ function setWeatherTheme(weatherCode, isDay = 1) {
   if (!isDay) createStars();
 
   if (weather.theme === "weather-rain" || weather.theme === "weather-drizzle") {
-    createRain(90);
+    createRain();
   }
 
   if (weather.theme === "weather-thunder") {
-    createRain(110);
+    createRain(window.innerWidth < 640 ? 55 : 110);
     triggerLightning();
-    setInterval(() => {
+
+    lightningInterval = setInterval(() => {
       if (document.body.classList.contains("weather-thunder")) {
         triggerLightning();
       }
@@ -237,7 +267,9 @@ function renderCurrentWeather(location, weatherData) {
   weatherDescEl.textContent = weather.label;
   windSpeedEl.textContent = `${Math.round(current.wind_speed_10m)} km/h`;
   humidityEl.textContent = `${current.relative_humidity_2m}%`;
-  maxMinTempEl.textContent = `${formatTemp(daily.temperature_2m_max[0])} / ${formatTemp(daily.temperature_2m_min[0])}`;
+  maxMinTempEl.textContent = `${formatTemp(
+    daily.temperature_2m_max[0]
+  )} / ${formatTemp(daily.temperature_2m_min[0])}`;
   feelsLikeEl.textContent = formatTemp(current.apparent_temperature);
   sunriseTimeEl.textContent = formatTime(daily.sunrise[0]);
   sunsetTimeEl.textContent = formatTime(daily.sunset[0]);
@@ -257,7 +289,9 @@ function renderForecast(weatherData) {
     card.innerHTML = `
       <p class="forecast-day">${formatShortDay(date)}</p>
       <div class="forecast-icon">${weather.icon}</div>
-      <p class="forecast-temp">${formatTemp(daily.temperature_2m_max[index])} / ${formatTemp(daily.temperature_2m_min[index])}</p>
+      <p class="forecast-temp">${formatTemp(
+        daily.temperature_2m_max[index]
+      )} / ${formatTemp(daily.temperature_2m_min[index])}</p>
       <p class="forecast-desc">${weather.label}</p>
     `;
     forecastCards.appendChild(card);
@@ -268,16 +302,35 @@ function renderHourly(weatherData) {
   const hourly = weatherData.hourly;
   hourlyCards.innerHTML = "";
 
-  const currentHour = new Date().getHours();
-  const today = new Date().toISOString().slice(0, 10);
+  const now = new Date();
+  const currentHour = now.getHours();
+  const today = now.toISOString().slice(0, 10);
 
   let count = 0;
+
   for (let i = 0; i < hourly.time.length; i++) {
     const time = new Date(hourly.time[i]);
     const hour = time.getHours();
     const dateOnly = hourly.time[i].slice(0, 10);
 
     if (dateOnly === today && hour >= currentHour && count < 8) {
+      const weather = getWeatherInfo(hourly.weather_code[i]);
+
+      const card = document.createElement("div");
+      card.className = "hour-card";
+      card.innerHTML = `
+        <p class="hour-time">${formatTime(hourly.time[i])}</p>
+        <div class="hour-icon">${weather.icon}</div>
+        <p class="hour-temp">${formatTemp(hourly.temperature_2m[i])}</p>
+      `;
+
+      hourlyCards.appendChild(card);
+      count++;
+    }
+  }
+
+  if (count === 0) {
+    for (let i = 0; i < Math.min(8, hourly.time.length); i++) {
       const weather = getWeatherInfo(hourly.weather_code[i]);
       const card = document.createElement("div");
       card.className = "hour-card";
@@ -287,7 +340,6 @@ function renderHourly(weatherData) {
         <p class="hour-temp">${formatTemp(hourly.temperature_2m[i])}</p>
       `;
       hourlyCards.appendChild(card);
-      count++;
     }
   }
 }
@@ -325,11 +377,14 @@ async function fetchAndRenderWeather(city) {
 form.addEventListener("submit", (e) => {
   e.preventDefault();
   const city = cityInput.value.trim();
+
   if (!city) {
     showError("Please enter a city name.");
     return;
   }
+
   fetchAndRenderWeather(city);
+  cityInput.blur();
 });
 
 themeToggle.addEventListener("click", () => {
@@ -340,6 +395,15 @@ themeToggle.addEventListener("click", () => {
 unitToggle.addEventListener("click", () => {
   currentUnit = currentUnit === "c" ? "f" : "c";
   rerenderFromCurrentData();
+});
+
+window.addEventListener("resize", () => {
+  if (currentWeatherRaw) {
+    setWeatherTheme(
+      currentWeatherRaw.current.weather_code,
+      currentWeatherRaw.current.is_day
+    );
+  }
 });
 
 renderRecentSearches();
